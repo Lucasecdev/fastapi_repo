@@ -1,12 +1,24 @@
 name: CI
 
-on: pull_requests
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
 jobs:
-  continuous-integration
+  build:
     runs-on: ubuntu-latest
 
+    services:
+      docker:
+        image: docker:19.03.12
+        options: --privileged
+        ports:
+          - 8000:8000
+
     steps:
-    - name: Checkout repository
+    - name: Check out the code
       uses: actions/checkout@v2
 
     - name: Set up Python
@@ -17,29 +29,17 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install flake8 pytest requests
         pip install -r requirements.txt
 
-    - name: Lint with flake8
-      run: |
-        pip install flake8
-        flake8 .
-
-    - name: Build and run Docker containers
+    - name: Build and run Docker container
       run: |
         docker-compose up -d --build
 
-    - name: Wait for the server to be ready
+    - name: Wait for API to be up
       run: |
-        # Wait until the server is ready to accept requests
-        while ! curl -s http://localhost:8000/products; do
-          sleep 1
-        done
+        timeout 60s bash -c 'until curl -s http://localhost:8000/products; do echo "Waiting for API..."; sleep 5; done'
 
     - name: Run tests
       run: |
-        pip install pytest
-        pytest
-
-    - name: Shutdown Docker containers
-      run: |
-        docker-compose down
+        pytest --maxfail=1 --disable-warnings -v
