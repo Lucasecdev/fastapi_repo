@@ -2,6 +2,7 @@ from pydantic import BaseModel
 import json
 from product import Product
 
+
 class JsonDB(BaseModel):
     path: str
 
@@ -10,7 +11,7 @@ class JsonDB(BaseModel):
         data = json.loads(f.read())
         f.close
         return data
-    
+
     def insert(self, product: Product):
         data = self.read()
         data['products'].append(product.dict())
