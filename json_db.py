@@ -7,7 +7,7 @@ class JsonDB(BaseModel):
 
     def read(self):
         f = open(self.path)
-        data = json.loads (f.read())
+        data = json.loads(f.read())
         f.close
         return data
     
