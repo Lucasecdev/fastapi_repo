@@ -13,7 +13,7 @@ def get_products():
     return {"products": products}
 
 @app.post("/products")
-def create_product( product: Product):
+def create_product(product: Product):
 
     productDB.insert(product)
 

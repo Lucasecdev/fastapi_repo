@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 import json
-
 from product import Product
 
 class JsonDB(BaseModel):
