@@ -24,7 +24,23 @@ jobs:
         pip install flake8
         flake8 .
 
+    - name: Build and run Docker containers
+      run: |
+        docker-compose up -d --build
+
+    - name: Wait for the server to be ready
+      run: |
+        # Wait until the server is ready to accept requests
+        while ! curl -s http://localhost:8000; do
+          sleep 1
+        done
+
     - name: Run tests
       run: |
         pip install pytest
         pytest
+
+    - name: Shutdown Docker containers
+      run: |
+        docker-compose down
+        
