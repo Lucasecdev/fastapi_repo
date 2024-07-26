@@ -1,6 +1,4 @@
 import requests
-from fastapi.testclient import TestClient
-from main import app
 
 
 def test_should_get_list_of_products():
@@ -11,12 +9,3 @@ def test_should_get_list_of_products():
 
 
 test_should_get_list_of_products()
-
-
-client = TestClient(app)
-
-
-def test_should_get_list_of_products():
-    response = client.get("/products")
-    assert response.status_code == 200
-    assert isinstance(response.json(), list)
