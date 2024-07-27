@@ -1,45 +1,42 @@
 name: CI
 
-on: pull_requests
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
 jobs:
-  continuous-integration
+  build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.11'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install flake8 pytest
 
-    - name: Lint with flake8
-      run: |
-        pip install flake8
-        flake8 .
+      - name: Run flake8
+        run: flake8 .
 
-    - name: Build and run Docker containers
-      run: |
-        docker-compose up -d --build
+      - name: Make wait-for-it.sh executable
+        run: chmod +x ./wait-for-it.sh
 
-    - name: Wait for the server to be ready
-      run: |
-        # Wait until the server is ready to accept requests
-        while ! curl -s http://localhost:8000/products; do
-          sleep 1
-        done
+      - name: Start API and wait for it
+        run: |
+          nohup uvicorn main:app --host 0.0.0.0 --port 8000 &
+          ./wait-for-it.sh localhost:8000 --timeout=60 --strict -- echo "API is up"
 
-    - name: Run tests
-      run: |
-        pip install pytest
-        pytest
+      - name: Run tests
+        run: pytest
 
-    - name: Shutdown Docker containers
-      run: |
-        docker-compose down
