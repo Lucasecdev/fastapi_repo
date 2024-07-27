@@ -5,15 +5,21 @@ from product import Product
 
 app = FastAPI()
 
-productDB = JsonDB(path= './data/products.json')
+productDB = JsonDB(path='./data/products.json')
+
 
 @app.get("/products")
-def get_products():
+
+
+def get_products():  # noqa: E304
     products = productDB.read()
     return {"products": products}
 
+
 @app.post("/products")
-def create_product( product: Product):
+
+
+def create_product(product: Product):  # noqa: E304
 
     productDB.insert(product)
 
